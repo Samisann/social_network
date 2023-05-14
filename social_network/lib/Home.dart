@@ -21,14 +21,19 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: Drawer(
+        // style
+        backgroundColor: Colors.blueGrey[100],
         child: ListView(
+          // style
+          padding: EdgeInsets.zero,
+
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text('John Doe'),
-              accountEmail: Text('johndoe@gmail.com'),
+              accountName: Text('Olivier Assiene'),
+              accountEmail: Text('olivierAssiene@gmail.com'),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: NetworkImage(
-                    'https://via.placeholder.com/150x150.png?text=John+Doe'),
+                    'https://images.unsplash.com/photo-1682138764157-5fb201cd7c4c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80'),
               ),
             ),
             ListTile(
@@ -102,22 +107,28 @@ class _HomePageState extends State<HomePage> {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: 200,
+                height: 300,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: 10,
                   itemBuilder: (context, index) {
                     return Container(
-                      width: 200,
-                      height: 100,
+                      margin: EdgeInsets.all(10),
+                      width: 400,
+                      height: 300,
                       child: Card(
+                        // all 4 corners rounded
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         child: Column(
                           children: [
                             Image.network(
                               'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                              height: 100,
-                              width: 200,
+                              height: 200,
+                              width: 400,
                               fit: BoxFit.cover,
+                              // border radius
                             ),
                             Text('Bordeaux'),
                             Text('Cinéma'),

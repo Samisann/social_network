@@ -66,6 +66,13 @@ class SplashScreen extends StatelessWidget {
                   Spacer(flex: 2),
                   Center(
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.orangeAccent,
+                        onPrimary: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
