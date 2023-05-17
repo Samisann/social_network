@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
           //rounded corners container
           Container(
             // negative margin on the left
-            margin: EdgeInsetsDirectional.only(end: 150, top: 20),
+            margin: EdgeInsetsDirectional.only(end: 150, top: 10),
             height: 50,
             width: 300,
             decoration: BoxDecoration(
@@ -128,7 +128,6 @@ class _HomePageState extends State<HomePage> {
                               height: 200,
                               width: 400,
                               fit: BoxFit.cover,
-                              // border radius
                             ),
                             Text('Bordeaux'),
                             Text('Cinéma'),
@@ -140,6 +139,33 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+      // Bottom navigation bar
+      bottomNavigationBar: BottomNavigationBar(
+        // style
+        backgroundColor: Colors.orange,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_filled),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            label: 'Category',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
