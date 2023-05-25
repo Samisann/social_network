@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_network/login.dart';
+import 'package:http/http.dart' as http;
 
 class Register extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _RegisterState extends State<Register> {
   String _email = '';
   String _password = '';
   String _confirmPassword = '';
+  List<String> _hobbies = [];
 
   // Navigate to the next page
   void _nextPage(BuildContext context, Widget page) {
@@ -22,19 +24,70 @@ class _RegisterState extends State<Register> {
         context, MaterialPageRoute(builder: (BuildContext context) => page));
   }
 
+// // function to make a get request 
+// Future<void> getData() async {
+//   const url = "http://localhost:3000/api/v1/user";
+//   try {
+//     final response = await http.get(Uri.parse(url));
+//     print(response.body);
+//   } catch (e) {
+//     print('Error: $e');
+//   }
+// }
+// Function to make the POST request
+  Future<void> submitForm() async {
+    const url = "http://localhost:3000/api/v1/user";
+
+    // print of the data to be sent to the server
+    print('First Name: $_firstName');
+    print('Last Name: $_lastName');
+    print('Phone: $_phone');
+    print('Email: $_email');
+    print('Password: $_password');
+
+    try {
+      // Make the POST request
+      _formKey.currentState!.save();
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'email': _email,
+          'nom': _lastName,
+          'prenom': _firstName,
+          'telephone': _phone,
+          'password': _password,
+        },
+      );
+      print(response.body);
+
+      // Check the response status
+      if (response.statusCode == 200) {
+        // Request successful
+        print('Form submitted successfully');
+      } else {
+        // Request failed
+
+        print('Form submission failed');
+      }
+
+      // Reset the form
+      _formKey.currentState!.reset();
+    } catch (e) {
+      // Error occurred
+      print('Error: $e');
+    }
+  }
+
   // Submit the form
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Implement form submission
-      _formKey.currentState!.save();
-      print('First Name: $_firstName');
-      print('Last Name: $_lastName');
-      print('Phone: $_phone');
-      print('Email: $_email');
-      print('Password: $_password');
-      print('Confirm Password: $_confirmPassword');
-      _nextPage(context, LoginPage());
-    }
+    // TODO: Implement form submission
+
+    print('First Name: $_firstName');
+    print('Last Name: $_lastName');
+    print('Phone: $_phone');
+    print('Email: $_email');
+    print('Password: $_password');
+    print('Confirm Password: $_confirmPassword');
   }
 
   @override
@@ -148,23 +201,8 @@ class _RegisterState extends State<Register> {
                     },
                   ),
                   const SizedBox(height: 12.0),
-                  // [Confirm Password]
-                  TextFormField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      labelText: 'Confirmer le mot de passe',
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Confirmer votre mot de passe';
-                      }
-                      return null;
-                    },
-                    obscureText: true,
-                    onSaved: (value) {
-                      _confirmPassword = value!;
-                    },
-                  ),
+                  // dropdown list for the hobbies
+                  
                 ],
               ),
             ),
@@ -175,7 +213,7 @@ class _RegisterState extends State<Register> {
                   child: ElevatedButton(
                     style: style,
                     onPressed: () {
-                      _submitForm();
+                      submitForm();
                     },
                     child: const Text('S\'inscrire'),
                   ),

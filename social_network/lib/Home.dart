@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:social_network/category.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
+}
+
+void _nextPage(BuildContext context, Widget page) {
+  Navigator.pushReplacement(
+      context, MaterialPageRoute(builder: (BuildContext context) => page));
 }
 
 class _HomePageState extends State<HomePage> {
@@ -103,33 +109,45 @@ class _HomePageState extends State<HomePage> {
           // card slider
 
           Expanded(
-            // alignement at the bottom
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: 300,
+                height: MediaQuery.of(context).size.height,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: 10,
                   itemBuilder: (context, index) {
                     return Container(
                       margin: EdgeInsets.all(10),
-                      width: 400,
-                      height: 300,
+                      width: 300,
                       child: Card(
-                        // all 4 corners rounded
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Column(
                           children: [
-                            Image.network(
-                              'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                              height: 200,
-                              width: 400,
-                              fit: BoxFit.cover,
+                            ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
+                              child: Image.network(
+                                'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
+                                height:
+                                    140, // Adjust the height to fit within the card
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            Text('Bordeaux'),
+                            Column(
+                              children: [
+                                Text(
+                                  'Bordeaux',
+                                  style: TextStyle(fontSize: 20),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                             Text('Cinéma'),
                           ],
                         ),
@@ -149,8 +167,27 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
+        // navigation
+        onTap: (int index) {
+          switch (index) {
+            case 0:
+              _nextPage(context, HomePage());
+              break;
+            case 1:
+              _nextPage(context, CategoryPage());
+              break;
+            case 2:
+              _nextPage(context, HomePage());
+              break;
+            case 3:
+              _nextPage(context, HomePage());
+              break;
+          }
+        },
 
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
+          // navigation
+
           BottomNavigationBarItem(
             icon: Icon(Icons.home_filled),
             label: 'Home',

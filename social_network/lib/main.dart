@@ -7,9 +7,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Splash Screen Demo',
+      title: 'Splash screen',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        // Define the default brightness and colors.
+        brightness: Brightness.dark,
+        primaryColor: Colors.orange,
+
+        // Define the default font family.
+        fontFamily: 'Poppins',
+
+        // Define the default TextTheme. Use this to specify the default
       ),
       home: SplashScreen(),
     );
