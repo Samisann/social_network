@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:social_network/login.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Register extends StatefulWidget {
   @override
@@ -15,7 +16,6 @@ class _RegisterState extends State<Register> {
   String _phone = '';
   String _email = '';
   String _password = '';
-  String _confirmPassword = '';
   List<String> _hobbies = [];
 
   // Navigate to the next page
@@ -24,26 +24,45 @@ class _RegisterState extends State<Register> {
         context, MaterialPageRoute(builder: (BuildContext context) => page));
   }
 
-// // function to make a get request 
-// Future<void> getData() async {
-//   const url = "http://localhost:3000/api/v1/user";
-//   try {
-//     final response = await http.get(Uri.parse(url));
-//     print(response.body);
-//   } catch (e) {
-//     print('Error: $e');
-//   }
-// }
-// Function to make the POST request
+  // Function to fetch hobbies from API
+  Future<List<String>> fetchHobbies() async {
+    const apiUrl =
+        'http://localhost:3000/api/hobbies'; // Replace with your API URL
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        final hobbies = data.map((item) => item['label'] as String).toList();
+
+        print('Hobbies retrieved successfully');
+        print(hobbies);
+
+        return hobbies;
+      } else {
+        print(
+            'Failed to retrieve hobbies. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred while retrieving hobbies: $e');
+    }
+
+    return []; // Return an empty list in case of error or no data available
+  }
+
+  // Function to make the POST request
   Future<void> submitForm() async {
     const url = "http://localhost:3000/api/v1/user";
 
-    // print of the data to be sent to the server
+    // Print the data to be sent to the server
     print('First Name: $_firstName');
     print('Last Name: $_lastName');
     print('Phone: $_phone');
     print('Email: $_email');
     print('Password: $_password');
+    print('Hobbies: $_hobbies');
 
     try {
       // Make the POST request
@@ -56,6 +75,7 @@ class _RegisterState extends State<Register> {
           'prenom': _firstName,
           'telephone': _phone,
           'password': _password,
+          'hobbies': json.encode(_hobbies),
         },
       );
       print(response.body);
@@ -66,7 +86,6 @@ class _RegisterState extends State<Register> {
         print('Form submitted successfully');
       } else {
         // Request failed
-
         print('Form submission failed');
       }
 
@@ -76,18 +95,6 @@ class _RegisterState extends State<Register> {
       // Error occurred
       print('Error: $e');
     }
-  }
-
-  // Submit the form
-  void _submitForm() {
-    // TODO: Implement form submission
-
-    print('First Name: $_firstName');
-    print('Last Name: $_lastName');
-    print('Phone: $_phone');
-    print('Email: $_email');
-    print('Password: $_password');
-    print('Confirm Password: $_confirmPassword');
   }
 
   @override
@@ -198,11 +205,48 @@ class _RegisterState extends State<Register> {
                     obscureText: true,
                     onSaved: (value) {
                       _password = value!;
+                      print(_password);
                     },
                   ),
                   const SizedBox(height: 12.0),
-                  // dropdown list for the hobbies
-                  
+                  // Dropdown list for hobbies
+
+                  FutureBuilder<List<String>>(
+                    future: fetchHobbies(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<String>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            filled: true,
+                            labelText: 'Hobbies',
+                          ),
+                          value: _hobbies.isNotEmpty ? _hobbies[0] : null,
+                          items: snapshot.data?.map((hobby) {
+                            return DropdownMenuItem<String>(
+                              value: hobby,
+                              child: Text(hobby),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _hobbies = [value!];
+                            });
+                          },
+                          validator: (value) {
+                            if (_hobbies.isEmpty) {
+                              return 'Please select at least one hobby';
+                            }
+                            return null;
+                          },
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -213,7 +257,9 @@ class _RegisterState extends State<Register> {
                   child: ElevatedButton(
                     style: style,
                     onPressed: () {
-                      submitForm();
+                      if (_formKey.currentState!.validate()) {
+                        submitForm();
+                      }
                     },
                     child: const Text('S\'inscrire'),
                   ),
