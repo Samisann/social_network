@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
+import 'profile.dart';
+
+import 'login.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -47,6 +50,8 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.person),
               onTap: () {
                 // TODO: Navigate to profile page
+
+                _nextPage(context, Profile());
               },
             ),
             ListTile(
@@ -62,6 +67,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.logout),
               onTap: () {
                 // TODO: Implement logout functionality
+                _nextPage(context, LoginPage());
               },
             ),
           ],
@@ -180,7 +186,7 @@ class _HomePageState extends State<HomePage> {
               _nextPage(context, HomePage());
               break;
             case 3:
-              _nextPage(context, HomePage());
+              _nextPage(context,  Profile());
               break;
           }
         },

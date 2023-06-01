@@ -69,10 +69,28 @@ class _LoginPageState extends State<LoginPage> {
             //full width button
 
             const SizedBox(height: 200.0),
-            ElevatedButton(
-                style: style,
-                onPressed: (() => {_nextPage(context, Register())}),
-                child: Text('S\'inscrire')),
+            TextButton(
+  onPressed: (() => {_nextPage(context, Register())}),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text(
+        'Pas de compte?',
+        style: TextStyle(
+          color: Colors.grey,
+        ),
+      ),
+      SizedBox(width: 5),
+      Text(
+        'S\'inscrire',
+        style: TextStyle(
+          decoration: TextDecoration.underline, // Ajoute un soulignement au texte
+        ),
+      ),
+    ],
+  ),
+)
+,
           ],
         ),
       ),
