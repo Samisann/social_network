@@ -3,6 +3,8 @@ import 'package:social_network/login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:social_network/models/Hobby.dart';
+
 class Register extends StatefulWidget {
   @override
   _RegisterState createState() => _RegisterState();
@@ -25,7 +27,7 @@ class _RegisterState extends State<Register> {
   }
 
   // Function to fetch hobbies from API
-  Future<List<String>> fetchHobbies() async {
+  Future<List<Hobby>> fetchHobbies() async {
     const apiUrl =
         'http://localhost:3000/api/hobbies'; // Replace with your API URL
 
@@ -35,7 +37,7 @@ class _RegisterState extends State<Register> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        final hobbies = data.map((item) => item['label'] as String).toList();
+        final hobbies = data.map((item) => new Hobby(id:item['_id'],label:item['label'])).toList();
 
         print('Hobbies retrieved successfully');
         print(hobbies);
@@ -211,10 +213,10 @@ class _RegisterState extends State<Register> {
                   const SizedBox(height: 12.0),
                   // Dropdown list for hobbies
 
-                  FutureBuilder<List<String>>(
+                  FutureBuilder<List<Hobby>>(
                     future: fetchHobbies(),
                     builder: (BuildContext context,
-                        AsyncSnapshot<List<String>> snapshot) {
+                        AsyncSnapshot<List<Hobby>> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();
                       } else if (snapshot.hasError) {
@@ -228,8 +230,8 @@ class _RegisterState extends State<Register> {
                           value: _hobbies.isNotEmpty ? _hobbies[0] : null,
                           items: snapshot.data?.map((hobby) {
                             return DropdownMenuItem<String>(
-                              value: hobby,
-                              child: Text(hobby),
+                              value: hobby.id,
+                              child: Text(hobby.label),
                             );
                           }).toList(),
                           onChanged: (value) {
