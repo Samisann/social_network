@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                               child: Image.network(
                                 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
                                 height:
-                                    140, // Adjust the height to fit within the card
+                                    110, // Adjust the height to fit within the card
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
               _nextPage(context, HomePage());
               break;
             case 3:
-              _nextPage(context,  Profile());
+              _nextPage(context, Profile());
               break;
           }
         },

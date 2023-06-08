@@ -37,7 +37,7 @@ class _RegisterState extends State<Register> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        final hobbies = data.map((item) => new Hobby(id:item['_id'],label:item['label'])).toList();
+        final hobbies = data.map((item) => Hobby(id:item['_id'],label:item['label'])).toList();
 
         print('Hobbies retrieved successfully');
         print(hobbies);

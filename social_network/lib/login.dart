@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:social_network/Home.dart';
 import 'package:social_network/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -8,13 +8,35 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-// next page method
 void _nextPage(BuildContext context, Widget page) {
+  // if user is logged in, go to home page
+
   Navigator.pushReplacement(
       context, MaterialPageRoute(builder: (BuildContext context) => page));
 }
 
 class _LoginPageState extends State<LoginPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  Future<bool> _loginUser(
+      TextEditingController email, TextEditingController pass) async {
+    const apiUrl = "http://localhost:3000/api/v1/user/login";
+    final emailText = email.text;
+    final passwordText = pass.text;
+    const parameter = "";
+    final response = await http.post(Uri.parse(apiUrl), body: {
+      'email': emailText,
+      'password': passwordText,
+    });
+    if (response.statusCode == 200) {
+      if (response.body.contains('$emailText')) return true;
+      print("ok");
+    }
+    print(response.statusCode);
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style =
@@ -31,18 +53,17 @@ class _LoginPageState extends State<LoginPage> {
                 // flutter logo
                 Image.asset('assets/images/logo.png'),
 
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 16.0), 
                 const Text('Connexion'),
               ],
             ),
             const SizedBox(height: 120.0),
-            // TODO: Remove filled: true values (103)
-            // TODO: Add TextField widgets (101)
             // [Name]
             TextFormField(
-              decoration: InputDecoration(
+              controller: emailController,
+              decoration: const InputDecoration(
                 filled: true,
-                labelText: 'Nom',
+                labelText: 'Email',
               ),
             ),
             // spacer
@@ -50,7 +71,8 @@ class _LoginPageState extends State<LoginPage> {
             // [Password]
             // forgot password
             TextFormField(
-              decoration: InputDecoration(
+              controller: passwordController,
+              decoration: const InputDecoration(
                 filled: true,
                 labelText: 'Mot de passe',
               ),
@@ -63,34 +85,35 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
                 style: style,
                 onPressed: (() => {
-                      _nextPage(context, HomePage()),
+                      // _nextPage(context, HomePage()),
+                      _loginUser(emailController, passwordController)
                     }),
                 child: Text('Se connecter')),
             //full width button
 
             const SizedBox(height: 200.0),
             TextButton(
-  onPressed: (() => {_nextPage(context, Register())}),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Text(
-        'Pas de compte?',
-        style: TextStyle(
-          color: Colors.grey,
-        ),
-      ),
-      SizedBox(width: 5),
-      Text(
-        'S\'inscrire',
-        style: TextStyle(
-          decoration: TextDecoration.underline, // Ajoute un soulignement au texte
-        ),
-      ),
-    ],
-  ),
-)
-,
+              onPressed: (() => {_nextPage(context, Register())}),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Pas de compte?',
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    'S\'inscrire',
+                    style: TextStyle(
+                      decoration: TextDecoration
+                          .underline, // Ajoute un soulignement au texte
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
