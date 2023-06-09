@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
 import 'profile.dart';
-
+import 'create_event.dart';
 import 'login.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,7 +35,6 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           // style
           padding: EdgeInsets.zero,
-
           children: [
             UserAccountsDrawerHeader(
               accountName: Text('Olivier Assiene'),
@@ -50,7 +49,6 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.person),
               onTap: () {
                 // TODO: Navigate to profile page
-
                 _nextPage(context, Profile());
               },
             ),
@@ -73,10 +71,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: // card slider widget
-          Column(
+      body: Column(
         children: [
-          // hero image
           Container(
             height: 400,
             child: Card(
@@ -88,9 +84,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          //rounded corners container
           Container(
-            // negative margin on the left
             margin: EdgeInsetsDirectional.only(end: 150, top: 10),
             height: 50,
             width: 300,
@@ -103,7 +97,6 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Center(
               child: Text(
-                textAlign: TextAlign.center,
                 'A la une',
                 style: TextStyle(
                   color: Colors.white,
@@ -112,8 +105,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // card slider
-
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -139,8 +130,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               child: Image.network(
                                 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                                height:
-                                    140, // Adjust the height to fit within the card
+                                height: 140,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -166,14 +156,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
-        // style
         backgroundColor: Colors.orange,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        // navigation
         onTap: (int index) {
           switch (index) {
             case 0:
@@ -186,14 +173,11 @@ class _HomePageState extends State<HomePage> {
               _nextPage(context, HomePage());
               break;
             case 3:
-              _nextPage(context,  Profile());
+              _nextPage(context, Profile());
               break;
           }
         },
-
         items: <BottomNavigationBarItem>[
-          // navigation
-
           BottomNavigationBarItem(
             icon: Icon(Icons.home_filled),
             label: 'Home',
@@ -211,6 +195,12 @@ class _HomePageState extends State<HomePage> {
             label: 'Profile',
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _nextPage(context, CreateEvent());
+        },
+        child: Icon(Icons.add),
       ),
     );
   }

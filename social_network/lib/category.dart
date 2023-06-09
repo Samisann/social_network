@@ -14,10 +14,10 @@ class CategoryPage extends StatelessWidget {
               width: 400,
               height: 300,
               child: Card(
-                // all 4 corners rounded
+                
 
                 child: Column(
-                  // shape
+                
 
                   children: [
                     Image.network(

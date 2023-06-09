@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:social_network/Home.dart';
 import 'package:social_network/register.dart';
+import 'reset_password.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -67,6 +69,23 @@ class _LoginPageState extends State<LoginPage> {
                     }),
                 child: Text('Se connecter')),
             //full width button
+TextButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResetPasswordPage(),
+      ),
+    );
+  },
+  child: Text(
+    'Mot de passe oublié?',
+    style: TextStyle(
+      decoration: TextDecoration.underline,
+      color: Colors.grey,
+    ),
+  ),
+),
 
             const SizedBox(height: 200.0),
             TextButton(
