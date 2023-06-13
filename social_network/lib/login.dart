@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:social_network/Home.dart';
 import 'package:social_network/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,14 +26,25 @@ class _LoginPageState extends State<LoginPage> {
     const apiUrl = "http://localhost:3000/api/v1/user/login";
     final emailText = email.text;
     final passwordText = pass.text;
-    const parameter = "";
-    final response = await http.post(Uri.parse(apiUrl), body: {
-      'email': emailText,
-      'password': passwordText,
-    });
+    final parameter = "?email=$emailText&password=$passwordText";
+    final response = await http.get(Uri.parse(apiUrl + parameter));
+    print("valeur controller: $emailText, $passwordText");
+    print(response.body);
     if (response.statusCode == 200) {
-      if (response.body.contains('$emailText')) return true;
-      print("ok");
+      final userData = json.decode(response.body);
+      print(userData);
+      final storedPassword = userData['password'];
+
+      if (storedPassword == passwordText) {
+        // Mot de passe valide, accéder à la page d'accueil
+        _nextPage(context, HomePage());
+        print("Mot de passe valide");
+        return true;
+      } else {
+        // Mot de passe invalide
+        print("Mot de passe invalide");
+        return false;
+      }
     }
     print(response.statusCode);
     return false;
@@ -53,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                 // flutter logo
                 Image.asset('assets/images/logo.png'),
 
-                const SizedBox(height: 16.0), 
+                const SizedBox(height: 16.0),
                 const Text('Connexion'),
               ],
             ),
