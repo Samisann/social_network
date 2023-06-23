@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:social_network/login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:social_network/service/storage.dart';
 
 import 'package:social_network/models/Hobby.dart';
 
@@ -12,7 +13,7 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
-
+  final StorageService _storageService =  StorageService();
   String _firstName = '';
   String _lastName = '';
   String _phone = '';
@@ -30,9 +31,13 @@ class _RegisterState extends State<Register> {
   Future<List<Hobby>> fetchHobbies() async {
     const apiUrl =
         'http://localhost:3000/api/hobbies'; // Replace with your API URL
-
+     String? token = await _storageService
+                          .readSecureData("token");
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      final response = await http.get(Uri.parse(apiUrl),
+      headers:{
+         'Authorization': 'Bearer $token',
+      });
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -135,6 +140,7 @@ class _RegisterState extends State<Register> {
                       return null;
                     },
                     onSaved: (value) {
+                      print(_firstName);
                       _firstName = value!;
                     },
                   ),
