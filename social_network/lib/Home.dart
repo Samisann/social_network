@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
 import 'profile.dart';
-
 import 'login.dart';
+import 'package:social_network/lib/servicestorage.dart'; 
 
 class HomePage extends StatefulWidget {
+  final StorageService storageService;
+
+  HomePage({required this.storageService});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-void _nextPage(BuildContext context, Widget page) {
-  Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (BuildContext context) => page));
-}
-
 class _HomePageState extends State<HomePage> {
+  void _nextPage(BuildContext context, Widget page) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (BuildContext context) => page),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,12 +36,9 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: Drawer(
-        // style
         backgroundColor: Colors.blueGrey[100],
         child: ListView(
-          // style
           padding: EdgeInsets.zero,
-
           children: [
             UserAccountsDrawerHeader(
               accountName: Text('Olivier Assiene'),
@@ -49,9 +52,10 @@ class _HomePageState extends State<HomePage> {
               title: Text('Profile'),
               leading: Icon(Icons.person),
               onTap: () {
-                // TODO: Navigate to profile page
-
-                _nextPage(context, Profile());
+                _nextPage(
+                  context,
+                  Profile(storageService: widget.storageService),
+                );
               },
             ),
             ListTile(
@@ -66,17 +70,14 @@ class _HomePageState extends State<HomePage> {
               title: Text('Logout'),
               leading: Icon(Icons.logout),
               onTap: () {
-                // TODO: Implement logout functionality
                 _nextPage(context, LoginPage());
               },
             ),
           ],
         ),
       ),
-      body: // card slider widget
-          Column(
+      body: Column(
         children: [
-          // hero image
           Container(
             height: 400,
             child: Card(
@@ -88,9 +89,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          //rounded corners container
           Container(
-            // negative margin on the left
             margin: EdgeInsetsDirectional.only(end: 150, top: 10),
             height: 50,
             width: 300,
@@ -103,8 +102,8 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Center(
               child: Text(
-                textAlign: TextAlign.center,
                 'A la une',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -112,8 +111,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // card slider
-
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -139,8 +136,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               child: Image.network(
                                 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                                height:
-                                    140, // Adjust the height to fit within the card
+                                height: 140,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -166,34 +162,28 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
-        // style
         backgroundColor: Colors.orange,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        // navigation
         onTap: (int index) {
           switch (index) {
             case 0:
-              _nextPage(context, HomePage());
+              _nextPage(context, HomePage(storageService: widget.storageService));
               break;
             case 1:
-              _nextPage(context, CategoryPage());
+              _nextPage(context, CategoryPage(storageService: widget.storageService));
               break;
             case 2:
-              _nextPage(context, HomePage());
+              _nextPage(context, HomePage(storageService: widget.storageService));
               break;
             case 3:
-              _nextPage(context,  Profile());
+              _nextPage(context, Profile(storageService: widget.storageService));
               break;
           }
         },
-
         items: <BottomNavigationBarItem>[
-          // navigation
-
           BottomNavigationBarItem(
             icon: Icon(Icons.home_filled),
             label: 'Home',

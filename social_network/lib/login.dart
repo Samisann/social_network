@@ -12,27 +12,26 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-// next page method
-void _nextPage(BuildContext context, Widget page) {
-  Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (BuildContext context) => page));
-}
-
 class _LoginPageState extends State<LoginPage> {
-   final _formKey = GlobalKey<FormState>();
-   String _login='';
-   String _password='';
-   final StorageService _storageService =  StorageService();
+  final _formKey = GlobalKey<FormState>();
+  String _login = '';
+  String _password = '';
+  final StorageService _storageService = StorageService();
 
-   Future<void> login() async {
+  void _nextPage(BuildContext context, Widget page) {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (BuildContext context) => page));
+  }
+
+  Future<void> login() async {
     const url = "http://localhost:3000/api/v1/auth/login";
 
-    // Print the data to be sent to the server
-    print('Login: $_login');
-    print('Password: $_password');
+    // Affiche les données envoyées au serveur
+    print('Login : $_login');
+    print('Mot de passe : $_password');
 
     try {
-      // Make the POST request
+      // Effectue la requête POST
       _formKey.currentState!.save();
       final response = await http.post(
         Uri.parse(url),
@@ -43,26 +42,28 @@ class _LoginPageState extends State<LoginPage> {
       );
       print(response.body);
 
-      // Check the response status
+      // Vérifie le statut de la réponse
       if (response.statusCode == 200) {
-        // Request successful
-        print('Form submitted successfully');
+        // Requête réussie
+        print('Formulaire soumis avec succès');
       } else {
-        // Request failed
-        print('Form submission failed');
+        // Échec de la requête
+        print('Échec de la soumission du formulaire');
       }
-      Token token =  Token.fromJson(jsonDecode(response.body));
-      _storageService.writeSecureData("token",token.accessToken).then((value) => _formKey.currentState!.reset());
-      // Reset the form
+      Token token = Token.fromJson(jsonDecode(response.body));
+      _storageService.writeSecureData("token", token.accessToken).then(
+          (value) => _formKey.currentState!.reset());
+      // Réinitialise le formulaire
     } catch (e) {
-      // Error occurred
-      print('Error: $e');
+      // Une erreur s'est produite
+      print('Erreur : $e');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style =
-        //full width button
+        // bouton largeur complète
         ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
     return Scaffold(
       body: SafeArea(
@@ -72,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 80.0),
             Column(
               children: <Widget>[
-                // flutter logo
+                // logo Flutter
                 Image.asset('assets/images/logo.png'),
 
                 const SizedBox(height: 16.0),
@@ -80,88 +81,85 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
             const SizedBox(height: 120.0),
-            // TODO: Remove filled: true values (103)
-            // TODO: Add TextField widgets (101)
-            // [Name]
+            // TODO: Supprimer les valeurs `filled: true` (103)
+            // TODO: Ajouter les widgets TextField (101)
+            // [Nom]
             Form(
               key: _formKey,
-              child: Column(
-                children: [
-            TextFormField(
-              decoration: InputDecoration(
-                filled: true,
-                labelText: 'Login',
-              ),
-              validator: (value) {
+              child: Column(children: [
+                TextFormField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      labelText: 'email',
+                    ),
+                    validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Please enter your login';
+                        return 'Veuillez saisir votre identifiant';
                       }
                       return null;
                     },
-             onSaved: (value) {
-              print(value);
+                    onSaved: (value) {
+                      print(value);
                       _login = value!;
-              }
-            ),
-            // spacer
-            const SizedBox(height: 12.0),
-            // [Password]
-            // forgot password
-            TextFormField(
-              decoration: InputDecoration(
-                filled: true,
-                labelText: 'Mot de passe',
-              ),
-              obscureText: true,
-              validator: (value) {
+                    }),
+                // espace
+                const SizedBox(height: 12.0),
+                // [Mot de passe]
+                // mot de passe oublié
+                TextFormField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      labelText: 'Mot de passe',
+                    ),
+                    obscureText: true,
+                    validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Please enter your password';
+                        return 'Veuillez saisir votre mot de passe';
                       }
                       return null;
                     },
-                onSaved: (value) {
-                _password = value!;
-                }
-            ),
-                ]
-              )
-            ),
-            // TODO: Add button bar (101)
-            const SizedBox(height: 20.0),
+                    onSaved: (value) {
+                      print(value);
+                      _password = value!;
+                    }),
+                const SizedBox(height: 12.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      child: const Text('Mot de passe oublié ?'),
+                      onPressed: () {
+                        // TODO: Implémenter la fonctionnalité Mot de passe oublié
+                      },
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  style: style,
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                      login();
+                      _nextPage(context, HomePage(storageService: null,));
+                    }
+                  },
+                  child: const Text('Se connecter'),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Vous n'avez pas de compte ?"),
+                    TextButton(
+                      child: const Text('S\'inscrire'),
+                      onPressed: () {
+                        _nextPage(context, Register());
 
-            ElevatedButton(
-                style: style,
-               onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        login();
-                      }
-               },
-                child: Text('Se connecter')),
-            //full width button
-
-            const SizedBox(height: 200.0),
-            TextButton(
-  onPressed: (() => {_nextPage(context, Register())}),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Text(
-        'Pas de compte?',
-        style: TextStyle(
-          color: Colors.grey,
-        ),
-      ),
-      SizedBox(width: 5),
-      Text(
-        'S\'inscrire',
-        style: TextStyle(
-          decoration: TextDecoration.underline, // Ajoute un soulignement au texte
-        ),
-      ),
-    ],
-  ),
-)
-,
+                      },
+                    ),
+                  ],
+                ),
+              ]),
+            ),
           ],
         ),
       ),
