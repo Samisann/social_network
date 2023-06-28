@@ -1,7 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:social_network/service/storage.dart';
 
 class CategoryPage extends StatelessWidget {
+  // final StorageService storageService;
+
+  // CategoryPage({required this.storageService});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

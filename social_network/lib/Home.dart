@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
 import 'profile.dart';
-
 import 'login.dart';
 
 class HomePage extends StatefulWidget {
+ 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-void _nextPage(BuildContext context, Widget page) {
-  Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (BuildContext context) => page));
-}
-
 class _HomePageState extends State<HomePage> {
+  void _nextPage(BuildContext context, Widget page) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (BuildContext context) => page),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,28 +32,26 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: Drawer(
-        // style
         backgroundColor: Colors.blueGrey[100],
         child: ListView(
-          // style
           padding: EdgeInsets.zero,
-
           children: [
             UserAccountsDrawerHeader(
               accountName: Text('Olivier Assiene'),
               accountEmail: Text('olivierAssiene@gmail.com'),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: NetworkImage(
-                    'https://images.unsplash.com/photo-1682138764157-5fb201cd7c4c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80'),
+                    'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
               ),
             ),
             ListTile(
               title: Text('Profile'),
               leading: Icon(Icons.person),
               onTap: () {
-                // TODO: Navigate to profile page
-
-                _nextPage(context, Profile());
+                _nextPage(
+                  context,
+                  Profile(),
+                );
               },
             ),
             ListTile(
@@ -66,17 +66,14 @@ class _HomePageState extends State<HomePage> {
               title: Text('Logout'),
               leading: Icon(Icons.logout),
               onTap: () {
-                // TODO: Implement logout functionality
                 _nextPage(context, LoginPage());
               },
             ),
           ],
         ),
       ),
-      body: // card slider widget
-          Column(
+      body: Column(
         children: [
-          // hero image
           Container(
             height: 400,
             child: Card(
@@ -88,9 +85,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          //rounded corners container
           Container(
-            // negative margin on the left
             margin: EdgeInsetsDirectional.only(end: 150, top: 10),
             height: 50,
             width: 300,
@@ -103,8 +98,8 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Center(
               child: Text(
-                textAlign: TextAlign.center,
                 'A la une',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -112,8 +107,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // card slider
-
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -139,8 +132,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               child: Image.network(
                                 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                                height:
-                                    140, // Adjust the height to fit within the card
+                                height: 140,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -166,14 +158,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
-        // style
         backgroundColor: Colors.orange,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        // navigation
         onTap: (int index) {
           switch (index) {
             case 0:
@@ -186,14 +175,11 @@ class _HomePageState extends State<HomePage> {
               _nextPage(context, HomePage());
               break;
             case 3:
-              _nextPage(context,  Profile());
+              _nextPage(context, Profile());
               break;
           }
         },
-
         items: <BottomNavigationBarItem>[
-          // navigation
-
           BottomNavigationBarItem(
             icon: Icon(Icons.home_filled),
             label: 'Home',
