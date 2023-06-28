@@ -8,19 +8,24 @@ import 'package:social_network/login.dart';
 import 'home.dart'; 
 
 class Profile extends StatefulWidget {
-  final StorageService storageService;
+  // final StorageService storageService;
 
-  Profile({required this.storageService});
+  // Profile({required this.storageService});
 
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
+  final _formKey = GlobalKey<FormState>();
+  String _login = '';
+  String _password = '';
+    final StorageService _storageService = StorageService();
+
   void _goToHome(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (BuildContext context) => HomePage(storageService: widget.storageService)),
+      MaterialPageRoute(builder: (BuildContext context) => HomePage()),
     );
   }
 
@@ -56,7 +61,7 @@ class _ProfileState extends State<Profile> {
                 shape: BoxShape.circle,
                 image: DecorationImage(
                   image: NetworkImage(
-                      'https://images.unsplash.com/photo-1685335220408-9ea26576e987?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80'),
+                      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -103,15 +108,22 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<UserInfo> fetchUserInfo() async {
+  // try {
     // Récupérer le token depuis le service de stockage
-    final token = await widget.storageService.readSecureData("token");
+    final token = await _storageService.readSecureData("token");
+    print(JwtDecoder.decode(token!));
 
     // Extraire l'email à partir du token
-    final email = JwtDecoder.decode(token!)['sub'];
+    final email = JwtDecoder.decode(token!)['username'];
 
     // Effectuer la requête GET pour récupérer les informations de l'utilisateur
-    final url = "http://example.com/api/user/$email";
-    final response = await http.get(Uri.parse(url));
+    final url = "http://localhost:3000/api/v1/user/$email";
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
@@ -119,7 +131,12 @@ class _ProfileState extends State<Profile> {
     } else {
       throw Exception('Failed to fetch user info');
     }
-  }
+  // } catch (e) {
+  //   print('Error occurred while retrieving user info: $e');
+  //   throw Exception('Failed to fetch user info');
+  // }
+}
+
 }
 
 class UserInfo {

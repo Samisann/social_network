@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                       login();
-                      _nextPage(context, HomePage(storageService: null,));
+                      _nextPage(context, HomePage());
                     }
                   },
                   child: const Text('Se connecter'),

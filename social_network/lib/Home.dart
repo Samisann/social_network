@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
 import 'profile.dart';
 import 'login.dart';
-import 'package:social_network/lib/servicestorage.dart'; 
 
 class HomePage extends StatefulWidget {
-  final StorageService storageService;
-
-  HomePage({required this.storageService});
-
+ 
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -45,7 +41,7 @@ class _HomePageState extends State<HomePage> {
               accountEmail: Text('olivierAssiene@gmail.com'),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: NetworkImage(
-                    'https://images.unsplash.com/photo-1682138764157-5fb201cd7c4c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80'),
+                    'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
               ),
             ),
             ListTile(
@@ -54,7 +50,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 _nextPage(
                   context,
-                  Profile(storageService: widget.storageService),
+                  Profile(),
                 );
               },
             ),
@@ -170,16 +166,16 @@ class _HomePageState extends State<HomePage> {
         onTap: (int index) {
           switch (index) {
             case 0:
-              _nextPage(context, HomePage(storageService: widget.storageService));
+              _nextPage(context, HomePage());
               break;
             case 1:
-              _nextPage(context, CategoryPage(storageService: widget.storageService));
+              _nextPage(context, CategoryPage());
               break;
             case 2:
-              _nextPage(context, HomePage(storageService: widget.storageService));
+              _nextPage(context, HomePage());
               break;
             case 3:
-              _nextPage(context, Profile(storageService: widget.storageService));
+              _nextPage(context, Profile());
               break;
           }
         },
