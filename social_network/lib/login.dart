@@ -6,6 +6,7 @@ import 'package:social_network/models/Token.dart';
 import 'package:http/http.dart' as http;
 import 'package:social_network/service/storage.dart';
 import 'dart:convert';
+import 'reset_password.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -86,8 +87,9 @@ class _LoginPageState extends State<LoginPage> {
             // [Nom]
             Form(
               key: _formKey,
-              child: Column(children: [
-                TextFormField(
+              child: Column(
+                children: [
+                  TextFormField(
                     decoration: InputDecoration(
                       filled: true,
                       labelText: 'email',
@@ -101,12 +103,13 @@ class _LoginPageState extends State<LoginPage> {
                     onSaved: (value) {
                       print(value);
                       _login = value!;
-                    }),
-                // espace
-                const SizedBox(height: 12.0),
-                // [Mot de passe]
-                // mot de passe oublié
-                TextFormField(
+                    },
+                  ),
+                  // espace
+                  const SizedBox(height: 12.0),
+                  // [Mot de passe]
+                  // mot de passe oublié
+                  TextFormField(
                     decoration: InputDecoration(
                       filled: true,
                       labelText: 'Mot de passe',
@@ -121,44 +124,63 @@ class _LoginPageState extends State<LoginPage> {
                     onSaved: (value) {
                       print(value);
                       _password = value!;
-                    }),
-                const SizedBox(height: 12.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      child: const Text('Mot de passe oublié ?'),
-                      onPressed: () {
-                        // TODO: Implémenter la fonctionnalité Mot de passe oublié
-                      },
+                    },
+                  ),
+                  const SizedBox(height: 12.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        child: const Text('Mot de passe oublié ?'),
+                        onPressed: () {
+                          // TODO: Implémenter la fonctionnalité Mot de passe oublié
+                        },
+                      ),
+                    ],
+                  ),
+                  ElevatedButton(
+                    style: style,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        login();
+                        _nextPage(context, HomePage());
+                      }
+                    },
+                    child: const Text('Se connecter'),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Vous n'avez pas de compte ?"),
+                      TextButton(
+                        child: const Text('S\'inscrire'),
+                        onPressed: () {
+                          _nextPage(context, Register());
+                        },
+                      ),
+                    ],
+                  ),
+                  //full width button
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ResetPasswordPage(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Mot de passe oublié?',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ],
-                ),
-                ElevatedButton(
-                  style: style,
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      login();
-                      _nextPage(context, HomePage());
-                    }
-                  },
-                  child: const Text('Se connecter'),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Vous n'avez pas de compte ?"),
-                    TextButton(
-                      child: const Text('S\'inscrire'),
-                      onPressed: () {
-                        _nextPage(context, Register());
-
-                      },
-                    ),
-                  ],
-                ),
-              ]),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -1,15 +1,65 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
-import 'profile.dart';
-import 'login.dart';
+import 'package:social_network/profile.dart';
+import 'package:social_network/create_event.dart';
+import 'package:social_network/login.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:social_network/service/storage.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
- 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  String? accountName;
+  String? accountEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserDetailsFromToken();
+  }
+
+  void _loadUserDetailsFromToken() async {
+    StorageService storageService = StorageService();
+    String? token = await storageService.readSecureData('token');
+
+    if (token != null) {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      String? email = decodedToken['username'];
+
+      try {
+        UserInfo userInfo = await fetchUserInfo(token, email!);
+        setState(() {
+          accountName = '${userInfo.prenom} ${userInfo.nom}';
+          accountEmail = userInfo.email;
+        });
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  Future<UserInfo> fetchUserInfo(String token, String email) async {
+    final url = "http://localhost:3000/api/v1/user/$email";
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return UserInfo.fromJson(jsonData);
+    } else {
+      throw Exception('Failed to fetch user info');
+    }
+  }
+
   void _nextPage(BuildContext context, Widget page) {
     Navigator.pushReplacement(
       context,
@@ -37,8 +87,8 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text('Olivier Assiene'),
-              accountEmail: Text('olivierAssiene@gmail.com'),
+              accountName: Text(accountName ?? ''),
+              accountEmail: Text(accountEmail ?? ''),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: NetworkImage(
                     'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
@@ -198,6 +248,35 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _nextPage(context, CreateEvent());
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class UserInfo {
+  final String email;
+  final String nom;
+  final String prenom;
+  final String telephone;
+
+  UserInfo({
+    required this.email,
+    required this.nom,
+    required this.prenom,
+    required this.telephone,
+  });
+
+  factory UserInfo.fromJson(Map<String, dynamic> json) {
+    return UserInfo(
+      email: json['email'],
+      nom: json['nom'],
+      prenom: json['prenom'],
+      telephone: json['telephone'],
     );
   }
 }

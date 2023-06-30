@@ -96,10 +96,10 @@ class _RegisterState extends State<Register> {
         print('Form submission failed');
       }
 
-      // Reset the form
+      
       _formKey.currentState!.reset();
     } catch (e) {
-      // Error occurred
+      
       print('Error: $e');
     }
   }

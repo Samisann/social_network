@@ -5,13 +5,9 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:social_network/service/storage.dart';
 import 'dart:convert';
 import 'package:social_network/login.dart';
-import 'home.dart'; 
+import 'home.dart';
 
 class Profile extends StatefulWidget {
-  // final StorageService storageService;
-
-  // Profile({required this.storageService});
-
   @override
   _ProfileState createState() => _ProfileState();
 }
@@ -20,7 +16,7 @@ class _ProfileState extends State<Profile> {
   final _formKey = GlobalKey<FormState>();
   String _login = '';
   String _password = '';
-    final StorageService _storageService = StorageService();
+  final StorageService _storageService = StorageService();
 
   void _goToHome(BuildContext context) {
     Navigator.pushReplacement(
@@ -50,11 +46,14 @@ class _ProfileState extends State<Profile> {
         ),
       ),
       body: Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(20),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // profile image
+            // Profile image
             Container(
-              margin: EdgeInsets.only(top: 40, bottom: 20),
+              margin: EdgeInsets.only(bottom: 20),
               width: 150,
               height: 150,
               decoration: BoxDecoration(
@@ -66,7 +65,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
             ),
-            // user info
+            // User info
             FutureBuilder<UserInfo>(
               future: fetchUserInfo(),
               builder: (BuildContext context, AsyncSnapshot<UserInfo> snapshot) {
@@ -78,16 +77,16 @@ class _ProfileState extends State<Profile> {
                   final userInfo = snapshot.data;
                   return Column(
                     children: [
-                      Text('Email: ${userInfo!.email}'),
-                      Text('Nom: ${userInfo.nom}'),
-                      Text('Prénom: ${userInfo.prenom}'),
-                      Text('Téléphone: ${userInfo.telephone}'),
+                      buildUserInfoRow('Email', userInfo!.email),
+                      buildUserInfoRow('Nom', userInfo.nom),
+                      buildUserInfoRow('Prénom', userInfo.prenom),
+                      buildUserInfoRow('Téléphone', userInfo.telephone),
                     ],
                   );
                 }
               },
             ),
-            // logout button
+            // Logout button
             Padding(
               padding: EdgeInsets.all(10),
               child: ElevatedButton(
@@ -107,16 +106,28 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  Widget buildUserInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label + ': ',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(value),
+        ],
+      ),
+    );
+  }
+
   Future<UserInfo> fetchUserInfo() async {
-  // try {
-    // Récupérer le token depuis le service de stockage
     final token = await _storageService.readSecureData("token");
     print(JwtDecoder.decode(token!));
 
-    // Extraire l'email à partir du token
     final email = JwtDecoder.decode(token!)['username'];
 
-    // Effectuer la requête GET pour récupérer les informations de l'utilisateur
     final url = "http://localhost:3000/api/v1/user/$email";
     final response = await http.get(
       Uri.parse(url),
@@ -131,12 +142,7 @@ class _ProfileState extends State<Profile> {
     } else {
       throw Exception('Failed to fetch user info');
     }
-  // } catch (e) {
-  //   print('Error occurred while retrieving user info: $e');
-  //   throw Exception('Failed to fetch user info');
-  // }
-}
-
+  }
 }
 
 class UserInfo {
