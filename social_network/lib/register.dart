@@ -30,7 +30,7 @@ class _RegisterState extends State<Register> {
   // Function to fetch hobbies from API
   Future<List<Hobby>> fetchHobbies() async {
     const apiUrl =
-        'http://localhost:3000/api/hobbies'; // Replace with your API URL
+        'http://localhost:3000/api/hobbies'; 
      String? token = await _storageService
                           .readSecureData("token");
     try {
@@ -56,7 +56,7 @@ class _RegisterState extends State<Register> {
       print('Error occurred while retrieving hobbies: $e');
     }
 
-    return []; // Return an empty list in case of error or no data available
+    return []; 
   }
 
   // Function to make the POST request

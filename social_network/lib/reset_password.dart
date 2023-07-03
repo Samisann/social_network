@@ -20,7 +20,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         // Le mot de passe a été réinitialisé avec succès
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -15,34 +15,34 @@ class _CreateEventState extends State<CreateEvent> {
   List<Hobby> hobbies = [];
   final StorageService _storageService = StorageService();
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController eventNameController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController lieuController = TextEditingController();
-  Hobby? selectedHobby;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchHobbies().then((hobbiesList) {
-      setState(() {
-        hobbies = hobbiesList;
-      });
-    });
-  }
+  String _name = '';
+  String _description = '';
+  double _prix = 0;
+  String email = '';
+  String _date = '';
+  String _lieu = '';
+  List<String> _hobbies = [];
+  double _latitude = 0;
+  double _longitude = 0;
 
   Future<List<Hobby>> fetchHobbies() async {
     const apiUrl = 'http://localhost:3000/api/hobbies';
+    String? token = await _storageService.readSecureData("token");
 
     try {
-      final response = await http.get(Uri.parse(apiUrl));
-
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
         final hobbies = data
-            .map((item) => Hobby(id: item['_id'], label: item['label']))
-            .toList();
+    .map((item) => Hobby(id: item['_id'], label: item['label']))
+    .toList();
+
 
         print('Hobbies retrieved successfully');
         print(hobbies);
@@ -58,37 +58,74 @@ class _CreateEventState extends State<CreateEvent> {
     return [];
   }
 
-  Future<void> createEvent() async {
-    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      // Get the values from the form fields
-      String eventName = eventNameController.text;
-      String description = descriptionController.text;
-      String date = dateController.text;
-      String lieuLat = lieuController.text;
-      String lieuLong = '';
+  Future<void> getAddressCoordinates(String address) async {
+    const apiKey = 'abc6b88b222268f459a9954ca72aad2d';
+    print('Le lieu est $address' );
 
-      // Get the email from the token
+    // final encodedAddress = Uri.encodeQueryComponent(address);
+    final url =
+      'https://api.positionstack.com/v1/forward?access_key=$apiKey&query=$address';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      final data = jsonDecode(response.body);
+
+      if (data['data'] != null && data['data'].isNotEmpty) {
+        final result = data['data'][0];
+        setState(() {
+          _latitude = result['latitude'];
+          _longitude = result['longitude'];
+
+          print('la latitude et longetitude sont $_latitude, $_longitude');
+        });
+        // createEvent();
+      } else {
+        throw Exception('No coordinates found for the given address');
+      }
+    } catch (error) {
+      print('Failed to fetch coordinates for the address: $error');
+    }
+  }
+
+  Future<void> createEvent() async {
+    try {
+      _formKey.currentState!.save();
+
       final token = await _storageService.readSecureData("token");
       final email = JwtDecoder.decode(token!)['username'];
 
-      // Create the request body
-      Map<String, dynamic> requestBody = {
-        'eventName': eventName,
+      final eventUrl = 'http://localhost:3000/api/v1/user/event';
+
+      final event = {
         'email': email,
-        'description': description,
-        'date': date,
+        'nom': _name,
+        'description': _description,
+        'date': _date,
         'lieu': {
-          'lat': lieuLat,
-          'long': lieuLong,
+          'lat': _latitude,
+          'long': _longitude,
         },
-        'hobby': selectedHobby!.label,
-      };
+        'prix': _prix,
+        // 'eventId': 12345,
+        'hobbies': _hobbies.map((hobbyId) {
+    final hobby = hobbies.firstWhere((hobby) => hobby.id == hobbyId);
+    return {
+      'id': hobby.id,
+      'label': hobby.label,
+    };
+  }).toList(),
+};
 
-      const apiUrl = 'http://localhost:3000/api/v1/user/event';
-      final response = await http.post(Uri.parse(apiUrl), body: jsonEncode(requestBody));
+      final eventResponse = await http.post(
+        Uri.parse(eventUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(event),
+      );
 
-      if (response.statusCode == 200) {
-        // Display success dialogue
+      if (eventResponse.statusCode == 200) {
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -99,7 +136,6 @@ class _CreateEventState extends State<CreateEvent> {
                 TextButton(
                   child: Text('OK'),
                   onPressed: () {
-                    // Redirect to Home page
                     Navigator.pop(context);
                     Navigator.push(
                       context,
@@ -112,18 +148,13 @@ class _CreateEventState extends State<CreateEvent> {
           },
         );
       } else {
-        print('Échec de la création de l\'événement. Code de statut : ${response.statusCode}');
+        print('Échec de la création de l\'événement. Code de statut : ${eventResponse.statusCode}');
       }
-    }
-  }
 
-  @override
-  void dispose() {
-    eventNameController.dispose();
-    descriptionController.dispose();
-    dateController.dispose();
-    lieuController.dispose();
-    super.dispose();
+      _formKey.currentState!.reset();
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
@@ -131,22 +162,23 @@ class _CreateEventState extends State<CreateEvent> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Créer un événement'),
-         leading: IconButton(
+        leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => HomePage()),
-            );})
+            );
+          },
+        ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               TextFormField(
-                controller: eventNameController,
                 decoration: InputDecoration(labelText: 'Nom de l\'événement'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -154,9 +186,11 @@ class _CreateEventState extends State<CreateEvent> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _name = value!;
+                },
               ),
               TextFormField(
-                controller: descriptionController,
                 decoration: InputDecoration(labelText: 'Description'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -164,9 +198,11 @@ class _CreateEventState extends State<CreateEvent> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _description = value!;
+                },
               ),
               TextFormField(
-                controller: dateController,
                 decoration: InputDecoration(labelText: 'Date'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -174,9 +210,23 @@ class _CreateEventState extends State<CreateEvent> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _date = value!;
+                },
               ),
               TextFormField(
-                controller: lieuController,
+                decoration: InputDecoration(labelText: 'Prix'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez saisir le prix de l\'événement';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _prix = double.parse(value!);
+                },
+              ),
+              TextFormField(
                 decoration: InputDecoration(labelText: 'Lieu'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -184,32 +234,48 @@ class _CreateEventState extends State<CreateEvent> {
                   }
                   return null;
                 },
-              ),
-              DropdownButtonFormField<Hobby>(
-                decoration: InputDecoration(labelText: 'Hobbies'),
-                value: selectedHobby,
-                items: hobbies.map((Hobby hobby) {
-                  return DropdownMenuItem<Hobby>(
-                    value: hobby,
-                    child: Text(hobby.label),
-                  );
-                }).toList(),
-                onChanged: (Hobby? value) {
-                  setState(() {
-                    selectedHobby = value;
-                  });
+                onSaved: (value) {
+                  _lieu = value!;
+                  getAddressCoordinates(_lieu);
                 },
-                validator: (Hobby? value) {
-                  if (value == null) {
-                    return 'Veuillez sélectionner un hobby';
+              ),
+              FutureBuilder<List<Hobby>>(
+                future: fetchHobbies(),
+                builder: (BuildContext context, AsyncSnapshot<List<Hobby>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Erreur : ${snapshot.error}');
+                  } else {
+                    hobbies = snapshot.data!;
+                    return Column(
+                      children: hobbies.map((hobby) {
+                        return CheckboxListTile(
+                          title: Text(hobby.label),
+                          value: _hobbies.contains(hobby.id),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value != null && value) {
+                                _hobbies.add(hobby.id);
+                              } else {
+                                _hobbies.remove(hobby.id);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    );
                   }
-                  return null;
                 },
               ),
-              SizedBox(height: 16.0),
               ElevatedButton(
-                onPressed: createEvent,
-                child: Text('Créer un événement'),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    createEvent();
+                  }
+                },
+                child: Text('Créer'),
               ),
             ],
           ),
@@ -218,3 +284,5 @@ class _CreateEventState extends State<CreateEvent> {
     );
   }
 }
+
+

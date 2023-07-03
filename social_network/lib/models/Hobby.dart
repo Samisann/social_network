@@ -5,4 +5,5 @@ class Hobby{
     this.id='',
     this.label=''
   });
+  
 }

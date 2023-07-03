@@ -127,17 +127,17 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
                   const SizedBox(height: 12.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        child: const Text('Mot de passe oublié ?'),
-                        onPressed: () {
-                          // TODO: Implémenter la fonctionnalité Mot de passe oublié
-                        },
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.end,
+                  //   children: [
+                  //     TextButton(
+                  //       child: const Text('Mot de passe oublié ?'),
+                  //       onPressed: () {
+                  //         // TODO: Implémenter la fonctionnalité Mot de passe oublié
+                  //       },
+                  //     ),
+                  //   ],
+                  // ),
                   ElevatedButton(
                     style: style,
                     onPressed: () {
