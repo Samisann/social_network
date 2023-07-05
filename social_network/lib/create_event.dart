@@ -125,7 +125,7 @@ class _CreateEventState extends State<CreateEvent> {
         body: jsonEncode(event),
       );
 
-      if (eventResponse.statusCode == 200) {
+      if (eventResponse.statusCode == 201) {
         showDialog(
           context: context,
           builder: (BuildContext context) {

@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:social_network/category.dart';
+import 'package:social_network/models/Token.dart';
 import 'package:social_network/profile.dart';
 import 'package:social_network/create_event.dart';
 import 'package:social_network/login.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:social_network/service/storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:social_network/map.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? accountName;
   String? accountEmail;
+  
 
   @override
   void initState() {
@@ -57,6 +60,27 @@ class _HomePageState extends State<HomePage> {
       return UserInfo.fromJson(jsonData);
     } else {
       throw Exception('Failed to fetch user info');
+    }
+  }
+
+  Future<List<dynamic>> fetchEventData() async {
+        StorageService storageService = StorageService();
+
+    const url = "http://localhost:3000/api/v1/user/allevent";
+        String? token = await storageService.readSecureData('token');
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return jsonData['events'];
+    } else {
+      throw Exception('Failed to fetch event data');
     }
   }
 
@@ -164,42 +188,74 @@ class _HomePageState extends State<HomePage> {
                 height: MediaQuery.of(context).size.height,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: 10,
+                  itemCount: 1,
                   itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.all(10),
-                      width: 300,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              ),
-                              child: Image.network(
-                                'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                                height: 140,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  'Bordeaux',
-                                  style: TextStyle(fontSize: 20),
-                                  textAlign: TextAlign.center,
+                    return FutureBuilder<List<dynamic>>(
+                      future: fetchEventData(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<dynamic>> snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Erreur : ${snapshot.error}');
+                        } else {
+                          List<dynamic> events = snapshot.data!;
+                          if (events.isEmpty) {
+                            return Text('Aucun événement disponible');
+                          } else {
+                            final event = events[0]; 
+
+                            final hobby = event['hobby'];
+                            final price = event['price'];
+                            final location = event['location'];
+
+                            return Container(
+                              margin: EdgeInsets.all(10),
+                              width: 300,
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                              ],
-                            ),
-                            Text('Cinéma'),
-                          ],
-                        ),
-                      ),
+                                child: Column(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(20),
+                                        topRight: Radius.circular(20),
+                                      ),
+                                      child: Image.network(
+                                        'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
+                                        height: 140,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          location,
+                                          style: TextStyle(fontSize: 20),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        Text(
+                                          '${price.toString()}€',
+                                          style: TextStyle(fontSize: 18),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        Text(
+                                          hobby,
+                                          style: TextStyle(fontSize: 16),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
                     );
                   },
                 ),
@@ -222,7 +278,7 @@ class _HomePageState extends State<HomePage> {
               _nextPage(context, CategoryPage());
               break;
             case 2:
-              _nextPage(context, HomePage());
+              _nextPage(context, MapPage());
               break;
             case 3:
               _nextPage(context, Profile());
@@ -239,8 +295,8 @@ class _HomePageState extends State<HomePage> {
             label: 'Category',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            label: 'Favorites',
+            icon: Icon(Icons.map),
+            label: 'Carte',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

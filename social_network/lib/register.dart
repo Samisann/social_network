@@ -13,13 +13,15 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
-  final StorageService _storageService =  StorageService();
+  final StorageService _storageService = StorageService();
   String _firstName = '';
   String _lastName = '';
   String _phone = '';
   String _email = '';
   String _password = '';
   List<String> _hobbies = [];
+
+  List<Hobby> hobbies = [];
 
   // Navigate to the next page
   void _nextPage(BuildContext context, Widget page) {
@@ -29,20 +31,22 @@ class _RegisterState extends State<Register> {
 
   // Function to fetch hobbies from API
   Future<List<Hobby>> fetchHobbies() async {
-    const apiUrl =
-        'http://localhost:3000/api/hobbies'; 
-     String? token = await _storageService
-                          .readSecureData("token");
-    try {
-      final response = await http.get(Uri.parse(apiUrl),
-      headers:{
-         'Authorization': 'Bearer $token',
-      });
+    const apiUrl = 'http://localhost:3000/api/hobbies';
+    String? token = await _storageService.readSecureData("token");
 
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        final hobbies = data.map((item) => new Hobby(id:item['_id'],label:item['label'])).toList();
+        final hobbies = data
+            .map((item) => Hobby(id: item['_id'], label: item['label']))
+            .toList();
 
         print('Hobbies retrieved successfully');
         print(hobbies);
@@ -56,7 +60,7 @@ class _RegisterState extends State<Register> {
       print('Error occurred while retrieving hobbies: $e');
     }
 
-    return []; 
+    return [];
   }
 
   // Function to make the POST request
@@ -82,24 +86,29 @@ class _RegisterState extends State<Register> {
           'prenom': _firstName,
           'telephone': _phone,
           'password': _password,
-          'hobbies': json.encode(_hobbies),
+          'hobbies': json.encode(_hobbies.map((hobbyId) {
+            final hobby = hobbies.firstWhere((hobby) => hobby.id == hobbyId);
+            return {
+              'id': hobby.id,
+              'label': hobby.label,
+            };
+          }).toList()),
         },
       );
       print(response.body);
 
       // Check the response status
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         // Request successful
         print('Form submitted successfully');
+        _nextPage(context, LoginPage());
       } else {
         // Request failed
         print('Form submission failed');
       }
 
-      
       _formKey.currentState!.reset();
     } catch (e) {
-      
       print('Error: $e');
     }
   }
@@ -218,39 +227,32 @@ class _RegisterState extends State<Register> {
                   ),
                   const SizedBox(height: 12.0),
                   // Dropdown list for hobbies
-
                   FutureBuilder<List<Hobby>>(
                     future: fetchHobbies(),
                     builder: (BuildContext context,
                         AsyncSnapshot<List<Hobby>> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
+                        return CircularProgressIndicator();
                       } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
+                        return Text('Erreur : ${snapshot.error}');
                       } else {
-                        return DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            filled: true,
-                            labelText: 'Hobbies',
-                          ),
-                          value: _hobbies.isNotEmpty ? _hobbies[0] : null,
-                          items: snapshot.data?.map((hobby) {
-                            return DropdownMenuItem<String>(
-                              value: hobby.id,
-                              child: Text(hobby.label),
+                        hobbies = snapshot.data!;
+                        return Column(
+                          children: hobbies.map((hobby) {
+                            return CheckboxListTile(
+                              title: Text(hobby.label),
+                              value: _hobbies.contains(hobby.id),
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value!) {
+                                    _hobbies.add(hobby.id);
+                                  } else {
+                                    _hobbies.remove(hobby.id);
+                                  }
+                                });
+                              },
                             );
                           }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _hobbies = [value!];
-                            });
-                          },
-                          validator: (value) {
-                            if (_hobbies.isEmpty) {
-                              return 'Please select at least one hobby';
-                            }
-                            return null;
-                          },
                         );
                       }
                     },
@@ -258,35 +260,13 @@ class _RegisterState extends State<Register> {
                 ],
               ),
             ),
-            const SizedBox(height: 24.0),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: ElevatedButton(
-                    style: style,
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        submitForm();
-                      }
-                    },
-                    child: const Text('S\'inscrire'),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 12.0),
+            ElevatedButton(
+              style: style,
+              onPressed: submitForm,
+              child: const Text('S\'inscrire'),
             ),
-            const SizedBox(height: 50.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text('Déjà un compte?'),
-                TextButton(
-                  onPressed: () {
-                    _nextPage(context, LoginPage());
-                  },
-                  child: const Text('Se connecter'),
-                ),
-              ],
-            ),
+            const SizedBox(height: 80.0),
           ],
         ),
       ),
