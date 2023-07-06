@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -22,8 +23,9 @@ class _CreateEventState extends State<CreateEvent> {
   String _date = '';
   String _lieu = '';
   List<String> _hobbies = [];
-  double _latitude = 0;
-  double _longitude = 0;
+  String _latitude = '0';
+String _longitude = '0';
+
 
   Future<List<Hobby>> fetchHobbies() async {
     const apiUrl = 'http://localhost:3000/api/hobbies';
@@ -40,16 +42,16 @@ class _CreateEventState extends State<CreateEvent> {
         final List<dynamic> data = jsonDecode(response.body);
 
         final hobbies = data
-    .map((item) => Hobby(id: item['_id'], label: item['label']))
-    .toList();
-
+            .map((item) => Hobby(id: item['_id'], label: item['label']))
+            .toList();
 
         print('Hobbies retrieved successfully');
         print(hobbies);
 
         return hobbies;
       } else {
-        print('Failed to retrieve hobbies. Status code: ${response.statusCode}');
+        print(
+            'Failed to retrieve hobbies. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred while retrieving hobbies: $e');
@@ -58,13 +60,13 @@ class _CreateEventState extends State<CreateEvent> {
     return [];
   }
 
-  Future<void> getAddressCoordinates(String address) async {
+  Future<Coordinates> getAddressCoordinates(String address) async {
     const apiKey = 'abc6b88b222268f459a9954ca72aad2d';
-    print('Le lieu est $address' );
+    print('Le lieu est $address');
 
-    // final encodedAddress = Uri.encodeQueryComponent(address);
+    final encodedAddress = Uri.encodeQueryComponent(address);
     final url =
-      'https://api.positionstack.com/v1/forward?access_key=$apiKey&query=$address';
+        'https://api.positionstack.com/v1/forward?access_key=$apiKey&query=$encodedAddress';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -72,18 +74,18 @@ class _CreateEventState extends State<CreateEvent> {
 
       if (data['data'] != null && data['data'].isNotEmpty) {
         final result = data['data'][0];
-        setState(() {
-          _latitude = result['latitude'];
-          _longitude = result['longitude'];
+        final latitude = result['latitude'] ;
+        final longitude = result['longitude'] ;
 
-          print('la latitude et longetitude sont $_latitude, $_longitude');
-        });
-        // createEvent();
+        print('La latitude et longitude sont $latitude, $longitude');
+
+        return Coordinates(latitude , longitude );
       } else {
         throw Exception('No coordinates found for the given address');
       }
     } catch (error) {
       print('Failed to fetch coordinates for the address: $error');
+      throw error; // Rethrow the exception to be caught by the caller
     }
   }
 
@@ -95,6 +97,10 @@ class _CreateEventState extends State<CreateEvent> {
       final email = JwtDecoder.decode(token!)['username'];
 
       final eventUrl = 'http://localhost:3000/api/v1/user/event';
+      final hobby = {
+      'id': '645d4f38852b3cf66fac826f',
+      'label': 'Jeux de société',
+    };
 
       final event = {
         'email': email,
@@ -103,18 +109,12 @@ class _CreateEventState extends State<CreateEvent> {
         'date': _date,
         'lieu': {
           'lat': _latitude,
-          'long': _longitude,
+         'long': _longitude,
         },
         'prix': _prix,
         // 'eventId': 12345,
-        'hobbies': _hobbies.map((hobbyId) {
-    final hobby = hobbies.firstWhere((hobby) => hobby.id == hobbyId);
-    return {
-      'id': hobby.id,
-      'label': hobby.label,
-    };
-  }).toList(),
-};
+        'hobbies': [hobby],
+      };
 
       final eventResponse = await http.post(
         Uri.parse(eventUrl),
@@ -148,7 +148,8 @@ class _CreateEventState extends State<CreateEvent> {
           },
         );
       } else {
-        print('Échec de la création de l\'événement. Code de statut : ${eventResponse.statusCode}');
+        print(
+            'Échec de la création de l\'événement. Code de statut : ${eventResponse.statusCode}');
       }
 
       _formKey.currentState!.reset();
@@ -236,12 +237,12 @@ class _CreateEventState extends State<CreateEvent> {
                 },
                 onSaved: (value) {
                   _lieu = value!;
-                  getAddressCoordinates(_lieu);
                 },
               ),
               FutureBuilder<List<Hobby>>(
                 future: fetchHobbies(),
-                builder: (BuildContext context, AsyncSnapshot<List<Hobby>> snapshot) {
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<Hobby>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   } else if (snapshot.hasError) {
@@ -253,9 +254,9 @@ class _CreateEventState extends State<CreateEvent> {
                         return CheckboxListTile(
                           title: Text(hobby.label),
                           value: _hobbies.contains(hobby.id),
-                          onChanged: (bool? value) {
+                          onChanged: (value) {
                             setState(() {
-                              if (value != null && value) {
+                              if (value!) {
                                 _hobbies.add(hobby.id);
                               } else {
                                 _hobbies.remove(hobby.id);
@@ -269,10 +270,21 @@ class _CreateEventState extends State<CreateEvent> {
                 },
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
-                    createEvent();
+
+                    try {
+                      final coordinates =
+                          await getAddressCoordinates(_lieu);
+                      _latitude = coordinates.latitude.toString();
+                      _longitude = coordinates.longitude.toString();
+
+                      createEvent();
+                    } catch (error) {
+                      print(
+                          'Error occurred while fetching coordinates: $error');
+                    }
                   }
                 },
                 child: Text('Créer'),
@@ -284,5 +296,13 @@ class _CreateEventState extends State<CreateEvent> {
     );
   }
 }
+
+class Coordinates {
+  final double latitude;
+  final double longitude;
+
+  Coordinates(this.latitude, this.longitude);
+}
+
 
 
