@@ -6,8 +6,11 @@ import 'package:social_network/home.dart';
 
 class MapPage extends StatefulWidget {
   @override
+  
   _MapPageState createState() => _MapPageState();
 }
+
+List<LatLng> eventPositions = [];
 
 class _MapPageState extends State<MapPage> {
   Position? _currentPosition;

@@ -27,6 +27,7 @@ class _CreateEventState extends State<CreateEvent> {
 String _longitude = '0';
 
 
+
   Future<List<Hobby>> fetchHobbies() async {
     const apiUrl = 'http://localhost:3000/api/hobbies';
     String? token = await _storageService.readSecureData("token");
@@ -96,11 +97,11 @@ String _longitude = '0';
       final token = await _storageService.readSecureData("token");
       final email = JwtDecoder.decode(token!)['username'];
 
-      final eventUrl = 'http://localhost:3000/api/v1/user/event';
-      final hobby = {
-      'id': '645d4f38852b3cf66fac826f',
-      'label': 'Jeux de société',
-    };
+      final eventUrl = 'http://localhost:3000/api/v1/event/event';
+    //   final hobby = {
+    //   'id': '645d4f38852b3cf66fac826f',
+    //   'label': 'Jeux de société',
+    // };
 
       final event = {
         'email': email,
@@ -113,7 +114,13 @@ String _longitude = '0';
         },
         'prix': _prix,
         // 'eventId': 12345,
-        'hobbies': [hobby],
+        'hobbies': _hobbies.map((hobbyId) {
+            final hobby = hobbies.firstWhere((hobby) => hobby.id == hobbyId);
+            return {
+              'id': hobby.id,
+              'label': hobby.label,
+            };
+          }).toList(),
       };
 
       final eventResponse = await http.post(

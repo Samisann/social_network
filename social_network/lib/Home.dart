@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String? accountName;
   String? accountEmail;
-  
+  late List<Map<String, dynamic>> events;
 
   @override
   void initState() {
@@ -63,11 +63,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List<dynamic>> fetchEventData() async {
-        StorageService storageService = StorageService();
+  Future<List<Map<String, dynamic>>> fetchEventData() async {
+    StorageService storageService = StorageService();
 
-    const url = "http://localhost:3000/api/v1/user/allevent";
-        String? token = await storageService.readSecureData('token');
+    const url = "http://localhost:3000/api/v1/event/allevent";
+    String? token = await storageService.readSecureData('token');
 
     final response = await http.get(
       Uri.parse(url),
@@ -78,7 +78,9 @@ class _HomePageState extends State<HomePage> {
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      return jsonData['events'];
+      final events = jsonData['events'];
+
+      return List<Map<String, dynamic>>.from(events);
     } else {
       throw Exception('Failed to fetch event data');
     }
@@ -190,70 +192,79 @@ class _HomePageState extends State<HomePage> {
                   scrollDirection: Axis.horizontal,
                   itemCount: 1,
                   itemBuilder: (context, index) {
-                    return FutureBuilder<List<dynamic>>(
+                    return FutureBuilder<List<Map<String, dynamic>>>(
                       future: fetchEventData(),
                       builder: (BuildContext context,
-                          AsyncSnapshot<List<dynamic>> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          AsyncSnapshot<List<Map<String, dynamic>>>
+                              snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Erreur : ${snapshot.error}');
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Text('Aucun événement disponible');
                         } else {
-                          List<dynamic> events = snapshot.data!;
-                          if (events.isEmpty) {
-                            return Text('Aucun événement disponible');
-                          } else {
-                            final event = events[0]; 
+                          events = snapshot.data!;
 
-                            final hobby = event['hobby'];
-                            final price = event['price'];
-                            final location = event['location'];
+                          return ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: events.length,
+                            itemBuilder: (context, index) {
+                              final event = events[index];
+                              final nom = event['nom'];
+                              final description = event['description'];
+                              final price = event['prix'] is String
+                                  ? int.parse(event['prix'])
+                                  : event['prix'];
 
-                            return Container(
-                              margin: EdgeInsets.all(10),
-                              width: 300,
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        topRight: Radius.circular(20),
+                              return Container(
+                                margin: EdgeInsets.all(10),
+                                width: 300,
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                        child: Image.network(
+                                          'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZ                                          WFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
+                                          height: 140,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                      child: Image.network(
-                                        'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                                        height: 140,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
+                                      Column(
+                                        children: [
+                                          Text(
+                                            nom,
+                                            style: TextStyle(fontSize: 20),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          Text(
+                                            description,
+                                            style: TextStyle(fontSize: 16),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          Text(
+                                            '${price.toString()}€',
+                                            style: TextStyle(fontSize: 18),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          location,
-                                          style: TextStyle(fontSize: 20),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        Text(
-                                          '${price.toString()}€',
-                                          style: TextStyle(fontSize: 18),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        Text(
-                                          hobby,
-                                          style: TextStyle(fontSize: 16),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
+                              );
+                            },
+                          );
                         }
                       },
                     );
@@ -336,3 +347,4 @@ class UserInfo {
     );
   }
 }
+
