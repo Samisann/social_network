@@ -78,9 +78,10 @@ class _HomePageState extends State<HomePage> {
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      final events = jsonData['events'];
+      
+      
 
-      return List<Map<String, dynamic>>.from(events);
+      return List<Map<String, dynamic>>.from(jsonData);
     } else {
       throw Exception('Failed to fetch event data');
     }
@@ -183,96 +184,90 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 1,
-                  itemBuilder: (context, index) {
-                    return FutureBuilder<List<Map<String, dynamic>>>(
-                      future: fetchEventData(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<Map<String, dynamic>>>
-                              snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Erreur : ${snapshot.error}');
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return Text('Aucun événement disponible');
-                        } else {
-                          events = snapshot.data!;
+         Expanded(
+  child: Align(
+    alignment: Alignment.bottomCenter,
+    child: Container(
+      height: MediaQuery.of(context).size.height,
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: fetchEventData(),
+        builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Text('Erreur : ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Text('Aucun événement disponible');
+          } else {
+            final events = snapshot.data!;
+            print(events);
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                final event = events[index];
+                final nom = event['nom'];
+                final description = event['description'];
+                final price = event['prix'];
+              // print(event['prix']);
+              print(description);
+              print(nom);
+              print(event);
+              
 
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: events.length,
-                            itemBuilder: (context, index) {
-                              final event = events[index];
-                              final nom = event['nom'];
-                              final description = event['description'];
-                              final price = event['prix'] is String
-                                  ? int.parse(event['prix'])
-                                  : event['prix'];
+                return Container(
+                  margin: EdgeInsets.all(10),
+                  width: 300,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                          child: Image.network(
+                            'https://plus.unsplash.com/premium_photo-1677347310866-b467f0f00ab5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Y2FsZW5kYXJ8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60',
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              nom,
+                              style: TextStyle(fontSize: 20),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              description,
+                              style: TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              '$price€',
+                              style: TextStyle(fontSize: 18),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
+    ),
+  ),
+),
 
-                              return Container(
-                                margin: EdgeInsets.all(10),
-                                width: 300,
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(20),
-                                          topRight: Radius.circular(20),
-                                        ),
-                                        child: Image.network(
-                                          'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZ                                          WFyY2h8M3x8Y2luJUMzJUE5bWF8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60',
-                                          height: 140,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Column(
-                                        children: [
-                                          Text(
-                                            nom,
-                                            style: TextStyle(fontSize: 20),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          Text(
-                                            description,
-                                            style: TextStyle(fontSize: 16),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          Text(
-                                            '${price.toString()}€',
-                                            style: TextStyle(fontSize: 18),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
